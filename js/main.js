@@ -1005,23 +1005,12 @@ document.addEventListener('DOMContentLoaded', function () {
         logoEl.style.backgroundImage = ch.logo ? ('url(' + JSON.stringify(ch.logo) + ')') : '';
         updateFavoriteButton();
 
-        if (Hls.isSupported()) {
-            state.hls = new Hls();
-            state.hls.loadSource(ch.url);
-            state.hls.attachMedia(videoPlayer);
-            state.hls.on(Hls.Events.MANIFEST_PARSED, function () { videoPlayer.play(); });
-            state.hls.on(Hls.Events.ERROR, function (event, data) {
-                console.error('HLS.js error:', data);
-                if (!data.fatal) return;
-                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) state.hls.startLoad();
-                else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) state.hls.recoverMediaError();
-                else showToast('This channel could not be played');
-            });
-        } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+        // Ép tivi sử dụng trình phát Native HTML5 cho link m3u8 thay vì qua thư viện hls.js
+        if (videoPlayer.canPlayType('application/vnd.apple.mpegurl') || true) {
             videoPlayer.src = ch.url;
-            videoPlayer.addEventListener('loadedmetadata', function () { videoPlayer.play(); }, { once: true });
-        } else {
-            showToast('HLS is not supported on this device');
+            videoPlayer.play().catch(function (error) {
+                console.log("Playback error: ", error);
+            });
         }
 
         showOverlay();
